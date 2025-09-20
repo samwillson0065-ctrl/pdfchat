@@ -3,11 +3,7 @@ import OpenAI from "openai";
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { password, topic, keywords, instructions } = req.body;
-
-  if (password !== process.env.APP_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+  const { topic, keywords, instructions } = req.body;
 
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

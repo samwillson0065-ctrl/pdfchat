@@ -1,5 +1,5 @@
 {
-  "name": "my-pdf-app-with-chatgpt-secure",
+  "name": "my-pdf-app-with-chatgpt-login",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

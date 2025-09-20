@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [topic, setTopic] = useState("");
@@ -7,13 +8,21 @@ export default function Home() {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [pdfName, setPdfName] = useState("");
-  const [password, setPassword] = useState("");
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const auth = localStorage.getItem("authenticated");
+    if (auth !== "true") {
+      router.push("/login");
+    }
+  }, []);
 
   const generateContent = async () => {
     const res = await fetch("/api/generate-content", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic, keywords, instructions, password }),
+      body: JSON.stringify({ topic, keywords, instructions }),
     });
     const data = await res.json();
     if (data.error) {
@@ -29,13 +38,8 @@ export default function Home() {
     const res = await fetch("/api/generate-pdf", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content, pdfName, password }),
+      body: JSON.stringify({ title, content, pdfName }),
     });
-
-    if (res.status === 401) {
-      alert("Unauthorized: Wrong password");
-      return;
-    }
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
@@ -48,15 +52,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: "2rem", maxWidth: 600, margin: "auto" }}>
-      <h1>ChatGPT → PDF Generator (Secure)</h1>
-
-      <input
-        type="password"
-        style={{ width: "100%", margin: "8px 0", padding: "8px" }}
-        placeholder="Enter password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <h1>ChatGPT → PDF Generator (Secure Login)</h1>
 
       <input
         style={{ width: "100%", margin: "8px 0", padding: "8px" }}
