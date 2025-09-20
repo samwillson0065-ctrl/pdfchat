@@ -9,25 +9,26 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "OPENAI_API_KEY is missing on Vercel" });
   }
 
+  const { topic, keywords, instructions } = req.body;
+
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    const { topic } = req.body;
-    if (!topic) {
-      return res.status(400).json({ error: "Missing topic" });
-    }
-
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo",
       messages: [
-        { role: "system", content: "You are a helpful content generator." },
-        { role: "user", content: `Write about: ${topic}` },
+        { role: "system", content: "You are a helpful SEO content generator." },
+        { role: "user", content: `
+          Write about: ${topic}.
+          Include these keywords: ${keywords}.
+          Follow these extra instructions: ${instructions}.
+        ` },
       ],
-      max_tokens: 300,
+      max_tokens: 600,
     });
 
     const text = completion.choices[0].message.content;
-    return res.status(200).json({ content: text });
+    res.status(200).json({ content: text });
   } catch (err) {
     console.error("OpenAI API error:", err);
     return res.status(500).json({ error: err.message || "Error generating content" });
