@@ -1,15 +1,13 @@
 import OpenAI from "openai";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).end();
 
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: "OPENAI_API_KEY is missing on Vercel" });
-  }
+  const { password, topic, keywords, instructions } = req.body;
 
-  const { topic, keywords, instructions } = req.body;
+  if (password !== process.env.APP_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

@@ -1,11 +1,13 @@
 import PDFDocument from "pdfkit";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).end();
 
-  const { title, content, pdfName } = req.body;
+  const { password, title, content, pdfName } = req.body;
+
+  if (password !== process.env.APP_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(

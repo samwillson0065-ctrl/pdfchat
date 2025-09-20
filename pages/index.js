@@ -7,14 +7,19 @@ export default function Home() {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [pdfName, setPdfName] = useState("");
+  const [password, setPassword] = useState("");
 
   const generateContent = async () => {
     const res = await fetch("/api/generate-content", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic, keywords, instructions }),
+      body: JSON.stringify({ topic, keywords, instructions, password }),
     });
     const data = await res.json();
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
     setContent(data.content);
     if (!title) setTitle(topic);
     if (!pdfName) setPdfName(topic.replace(/\s+/g, "_").toLowerCase());
@@ -24,8 +29,13 @@ export default function Home() {
     const res = await fetch("/api/generate-pdf", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content, pdfName }),
+      body: JSON.stringify({ title, content, pdfName, password }),
     });
+
+    if (res.status === 401) {
+      alert("Unauthorized: Wrong password");
+      return;
+    }
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
@@ -38,7 +48,15 @@ export default function Home() {
 
   return (
     <div style={{ padding: "2rem", maxWidth: 600, margin: "auto" }}>
-      <h1>ChatGPT → PDF Generator</h1>
+      <h1>ChatGPT → PDF Generator (Secure)</h1>
+
+      <input
+        type="password"
+        style={{ width: "100%", margin: "8px 0", padding: "8px" }}
+        placeholder="Enter password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
       <input
         style={{ width: "100%", margin: "8px 0", padding: "8px" }}
